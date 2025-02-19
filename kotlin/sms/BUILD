@@ -10,6 +10,7 @@ kt_jvm_library(
         "@maven//:build_buf_gen_wgtwo_wgtwoapis_grpc_kotlin",
         "@maven//:build_buf_gen_wgtwo_wgtwoapis_protocolbuffers_kotlin",
         "@maven//:com_google_guava_guava",
+        "@maven//:com_google_protobuf_protobuf_java",
         "@maven//:com_wgtwo_api_auth",
         "@maven//:io_grpc_grpc_netty_shaded",
         "@maven//:io_grpc_grpc_protobuf",
@@ -18,7 +19,13 @@ kt_jvm_library(
 )
 
 kt_jvm_binary(
-    name = "sms-bot",
-    main_class = "com.wgtwo.example.smsbot.MainKt",
+    name = "send",
+    main_class = "com.wgtwo.example.sms.SendSmsKt",
+    runtime_deps = [":lib"],
+)
+
+kt_jvm_binary(
+    name = "receive",
+    main_class = "com.wgtwo.example.sms.ReceiveSmsKt",
     runtime_deps = [":lib"],
 )

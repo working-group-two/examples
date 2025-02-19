@@ -13,6 +13,7 @@ maven.install(
         "build.buf.gen:wgtwo_wgtwoapis_grpc_kotlin:1.4.1.1.20250211103443.865631c9c243",
         "com.github.ajalt.clikt:clikt:5.0.3",
         "com.wgtwo.api:auth:0.0.5",
+        "com.google.protobuf:protobuf-java:4.29.3",
     ],
     fetch_sources = True,
     repositories = [

@@ -1,13 +1,8 @@
-# Examples
-
-This directory contains example applications that demonstrate how to use the
-Working Group Two APIS.
-
-## SMS
+# SMS
 
 The SMS example demonstrates how to send and receive SMS messages.
 
-### Send SMS from subscriber
+## Send SMS from subscriber
 
 Required scopes:
 - `sms.text:send_from_subscriber`
@@ -19,7 +14,7 @@ export CLIENT_SECRET=YOUR_CLIENT_SECRET
 bazel run //kotlin/sms:send
 ```
 
-### Receive SMS
+## Receive SMS
 
 Required scopes:
 - `"events.sms.subscribe"`
