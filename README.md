@@ -1,32 +1,10 @@
 # Examples
 
-This directory contains example applications that demonstrate how to use the
-Working Group Two APIS.
+Sample applications for the Working Group Two APIs.
 
-## SMS
+## Kotlin
 
-The SMS example demonstrates how to send and receive SMS messages.
+### SMS
 
-### Send SMS from subscriber
-
-Required scopes:
-- `sms.text:send_from_subscriber`
-
-```shell
-export CLIENT_ID=YOUR_CLIENT_ID
-export CLIENT_SECRET=YOUR_CLIENT_SECRET
-
-bazel run //kotlin/sms:send
-```
-
-### Receive SMS
-
-Required scopes:
-- `"events.sms.subscribe"`
-
-```shell
-export CLIENT_ID=YOUR_CLIENT_ID
-export CLIENT_SECRET=YOUR_CLIENT_SECRET
-
-bazel run //kotlin/sms:receive
-```
+- [Send SMS from subscriber](kotlin/sms/README.md#send-sms-from-subscriber)
+- [Receive SMS](kotlin/sms/README.md#receive-sms)

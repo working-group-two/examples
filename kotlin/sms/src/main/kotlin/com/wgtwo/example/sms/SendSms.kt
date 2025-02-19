@@ -5,47 +5,51 @@ package com.wgtwo.example.sms
 
 import build.buf.gen.wgtwo.sms.v1.SmsServiceGrpcKt.SmsServiceCoroutineStub
 import build.buf.gen.wgtwo.sms.v1.sendTextFromSubscriberRequest
+import com.github.ajalt.clikt.command.main
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.prompt
 import com.wgtwo.auth.WgtwoAuth
+import com.wgtwo.example.BaseConfig
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import java.util.concurrent.TimeUnit
 
+
 /**
  * Send an SMS
  */
-suspend fun main() {
-    // Setup OAuth2.0 client credentials
-    val clientId = requireNotNull(System.getenv("CLIENT_ID")) { "You must set env CLIENT_ID" }
-    val clientSecret = requireNotNull(System.getenv("CLIENT_SECRET")) { "You must set env CLIENT_SECRET" }
+class SendSms : BaseConfig("bazel run //kotlin/sms:send --") {
+    private val from: String by argument()
+    private val to: String by argument()
+    private val message: String by option().prompt("SMS Content")
 
-    val wgtwoAuth = WgtwoAuth.builder(clientId, clientSecret).build()
-    val tokenSource = wgtwoAuth.clientCredentials.newTokenSource("sms.text:send_from_subscriber")
-    val callCredentials = tokenSource.callCredentials()
+    override suspend fun run() {
+        println("[$target] Sending SMS from $from to $to with message: ${message}")
 
-    // Create a gRPC channel to the API Gateway
-    val target = "sandbox.api.shamrock.wgtwo.com:443" // For sandbox
-    //val target = "api.shamrock.wgtwo.com:443" // For EU
-    //val target = "api.oak.wgtwo.com:443" // For US
+        val wgtwoAuth = WgtwoAuth.builder(clientId, clientSecret).build()
+        val tokenSource = wgtwoAuth.clientCredentials.newTokenSource("sms.text:send_from_subscriber")
+        val callCredentials = tokenSource.callCredentials()
 
-    val channel: ManagedChannel = ManagedChannelBuilder.forTarget(target)
-        .keepAliveWithoutCalls(true)
-        .keepAliveTime(60, TimeUnit.SECONDS)
-        .keepAliveTimeout(10, TimeUnit.SECONDS)
-        .build()
+        val channel: ManagedChannel = ManagedChannelBuilder.forTarget(target)
+            .keepAliveWithoutCalls(true)
+            .keepAliveTime(60, TimeUnit.SECONDS)
+            .keepAliveTimeout(10, TimeUnit.SECONDS)
+            .build()
 
-    // Create stub for the SMS service
-    val stub = SmsServiceCoroutineStub(channel).withCallCredentials(callCredentials)
+        val stub = SmsServiceCoroutineStub(channel).withCallCredentials(callCredentials)
 
-    // Send an SMS
-    val request = sendTextFromSubscriberRequest {
-        fromSubscriber = "+4799001122"
-        toAddress = "+4712345678"
-        content = "Hello, world!"
+        val request = sendTextFromSubscriberRequest {
+            fromSubscriber = from
+            toAddress = to
+            content = message
+        }
+
+        val response = stub.sendTextFromSubscriber(request)
+        println(response)
+
+        channel.shutdown().awaitTermination(10, TimeUnit.SECONDS)
     }
-
-    val response = stub.sendTextFromSubscriber(request)
-    println(response)
-
-    // Shutdown the channel
-    channel.shutdown().awaitTermination(10, TimeUnit.SECONDS)
 }
+
+suspend fun main(args: Array<String>) = SendSms().main(args)

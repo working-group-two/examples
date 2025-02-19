@@ -11,7 +11,7 @@ maven.install(
         "io.grpc:grpc-netty-shaded:1.70.0",
         "build.buf.gen:wgtwo_wgtwoapis_protocolbuffers_kotlin:29.3.0.1.20250211103443.865631c9c243",
         "build.buf.gen:wgtwo_wgtwoapis_grpc_kotlin:1.4.1.1.20250211103443.865631c9c243",
-        "com.github.ajalt.clikt:clikt:5.0.3",
+        "com.github.ajalt.clikt:clikt-jvm:5.0.3",
         "com.wgtwo.api:auth:0.0.5",
         "com.google.protobuf:protobuf-java:4.29.3",
     ],

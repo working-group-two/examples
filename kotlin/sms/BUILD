@@ -7,9 +7,10 @@ kt_jvm_library(
     name = "lib",
     srcs = glob(["src/main/**/*.kt"]),
     deps = [
+        "//kotlin/common",
         "@maven//:build_buf_gen_wgtwo_wgtwoapis_grpc_kotlin",
         "@maven//:build_buf_gen_wgtwo_wgtwoapis_protocolbuffers_kotlin",
-        "@maven//:com_google_guava_guava",
+        "@maven//:com_github_ajalt_clikt_clikt_jvm",
         "@maven//:com_google_protobuf_protobuf_java",
         "@maven//:com_wgtwo_api_auth",
         "@maven//:io_grpc_grpc_netty_shaded",
