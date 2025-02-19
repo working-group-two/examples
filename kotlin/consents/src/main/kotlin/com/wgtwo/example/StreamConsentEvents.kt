@@ -1,10 +1,15 @@
 /**
  * Copyright (C) 2025 Cisco Systems, Inc.
  */
-package com.wgtwo.example.sms
+package com.wgtwo.example.consents
 
-import build.buf.gen.wgtwo.events.v0.*
+import build.buf.gen.wgtwo.consents.v1.ConsentEventServiceGrpcKt
+import build.buf.gen.wgtwo.consents.v1.ackConsentChangeEventRequest
+import build.buf.gen.wgtwo.consents.v1.streamConsentChangeEventsRequest
+import build.buf.gen.wgtwo.events.v1.regularStream
+import build.buf.gen.wgtwo.events.v1.streamConfiguration
 import com.github.ajalt.clikt.command.main
+import com.google.protobuf.empty
 import com.wgtwo.auth.WgtwoAuth
 import com.wgtwo.example.BaseConfig
 import io.grpc.ManagedChannel
@@ -18,14 +23,14 @@ import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * Receive SMS events
+ * Stream Consent Events
  */
-class ReceiveSms : BaseConfig("bazel run //kotlin/sms:receive --") {
+class StreamConsentEvents : BaseConfig("bazel run //kotlin/consents:stream --") {
     override suspend fun run() {
         println("[$target] Starting...")
 
         val wgtwoAuth = WgtwoAuth.builder(clientId, clientSecret).build()
-        val tokenSource = wgtwoAuth.clientCredentials.newTokenSource("events.sms.subscribe")
+        val tokenSource = wgtwoAuth.clientCredentials.newTokenSource("")
         val callCredentials = tokenSource.callCredentials()
 
         val channel: ManagedChannel = ManagedChannelBuilder.forTarget(target)
@@ -34,18 +39,19 @@ class ReceiveSms : BaseConfig("bazel run //kotlin/sms:receive --") {
             .keepAliveTimeout(10, TimeUnit.SECONDS)
             .build()
 
-        // Create stub for the events service
-        val stub = EventsServiceGrpcKt.EventsServiceCoroutineStub(channel).withCallCredentials(callCredentials)
+        val stub = ConsentEventServiceGrpcKt.ConsentEventServiceCoroutineStub(channel)
+            .withCallCredentials(callCredentials)
 
-        val request = subscribeEventsRequest {
-            this.type += EventType.SMS_EVENT
-            this.maxInFlight = 10
-            this.manualAck = manualAckConfig {
-                this.enable = true
+
+        val request = streamConsentChangeEventsRequest {
+            streamConfiguration = streamConfiguration {
+                maxInFlight = 10
+                startAtNew = empty {}
+                regular = regularStream {}
             }
         }
-        stub.subscribe(request)
-            .onStart { println("Subscribing to SMS events...") }
+        stub.streamConsentChangeEvents(request)
+            .onStart { println("Subscribing to Consent events...") }
             .retryWhen { cause, attempt ->
                 println("[retry attempt $attempt] Got error: $cause")
                 // Retry if this is a gRPC error and that error is not UNAUTHENTICATED or PERMISSION_DENIED
@@ -62,17 +68,13 @@ class ReceiveSms : BaseConfig("bazel run //kotlin/sms:receive --") {
                 println("Received event:")
                 println(response)
 
-                val ackRequest = ackRequest {
-                    inbox = response.event.metadata.ackInbox
-                    sequence = response.event.metadata.sequence
+                val ackRequest = ackConsentChangeEventRequest {
+                    ackInfo = response.metadata.ackInfo
                 }
-                stub.ack(ackRequest)
+                stub.ackConsentChangeEvent(ackRequest)
                 println("Acknowledged event")
             }
-
-        // Shutdown the channel
-        channel.shutdown().awaitTermination(10, TimeUnit.SECONDS)
     }
 }
 
-suspend fun main(args: Array<String>) = ReceiveSms().main(args)
+suspend fun main(args: Array<String>) = StreamConsentEvents().main(args)
