@@ -38,10 +38,10 @@ class ReceiveSms : BaseConfig("bazel run //kotlin/sms:receive --") {
         val stub = EventsServiceGrpcKt.EventsServiceCoroutineStub(channel).withCallCredentials(callCredentials)
 
         val request = subscribeEventsRequest {
-            this.type += EventType.SMS_EVENT
-            this.maxInFlight = 10
-            this.manualAck = manualAckConfig {
-                this.enable = true
+            type += EventType.SMS_EVENT
+            maxInFlight = 10
+            manualAck = manualAckConfig {
+                enable = true
             }
         }
         stub.subscribe(request)
